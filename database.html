@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+
+
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDMM9w0BPEVhu-GnuL0_spwoH_Mkl2GmAE",
+    authDomain: "booking-f5070.firebaseapp.com",
+    projectId: "booking-f5070",
+    storageBucket: "booking-f5070.firebasestorage.app",
+    messagingSenderId: "201773212594",
+    appId: "1:201773212594:web:759d0c29fffb127e667aab"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  const allowedEmail = "eliteeventsandcaterers@outlook.ie"; // replace this
+
+  firebase.auth().onAuthStateChanged((user) => {
+    if (!user || user.email !== allowedEmail) {
+      // Not logged in or wrong user — redirect to login page or YouTube
+      window.location.href = "https://eliteevent.ie/Login.html"
+    }
+  });
+</script>
+
+
+
+<style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: #f9fafb;
+      color: #333;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        flex-direction: row;
+      }
+    }
+
+    #bookingList {
+      width: 100%;
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    @media (min-width: 768px) {
+      #bookingList {
+        width: 30%;
+        border-bottom: none;
+        border-right: 1px solid #ddd;
+        height: 100vh;
+      }
+    }
+
+    #bookingList h2 {
+      margin-top: 0;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .booking {
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      background-color: #f1f5f9;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .booking:hover {
+      background-color: #e2e8f0;
+    }
+
+    .booking.selected {
+      background-color: #cbd5e1;
+      font-weight: bold;
+    }
+
+    #details {
+      width: 100%;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 768px) {
+      #details {
+        width: 70%;
+        padding: 30px;
+        height: 100vh;
+      }
+    }
+
+    #details h2 {
+      font-size: 22px;
+      margin-top: 0;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      max-width: 100%;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #1e293b;
+    }
+
+    .card p {
+      margin: 6px 0;
+      line-height: 1.6;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="bookingList">
+    <h2>Bookings</h2>
+    <div id="listContainer"></div>
+  </div>
+
+  <div id="details">
+    <h2>Details</h2>
+    <div id="bookingDetails">
+      <div class="card">Click on a booking to view details.</div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDMM9w0BPEVhu-GnuL0_spwoH_Mkl2GmAE",
+      authDomain: "booking-f5070.firebaseapp.com",
+      projectId: "booking-f5070",
+      storageBucket: "booking-f5070.firebasestorage.app",
+      messagingSenderId: "201773212594",
+      appId: "1:201773212594:web:759d0c29fffb127e667aab"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const listContainer = document.getElementById("listContainer");
+    const bookingDetails = document.getElementById("bookingDetails");
+    let selectedDiv = null;
+
+    function formatTimestamp(ts) {
+      if (!ts) return "";
+      let dateObj = ts.toDate ? ts.toDate() : new Date(ts);
+      return dateObj.toLocaleString('en-IN', {
+        year: 'numeric', month: 'long', day: 'numeric',
+        hour: 'numeric', minute: '2-digit',
+        hour12: true
+      });
+    }
+
+    function renderDetails(data) {
+      bookingDetails.innerHTML = `
+        <div class="card">
+          <h3>${data.firstName || ""} ${data.surname || ""}</h3>
+          <p><span class="label">Email:</span> ${data.email || ""}</p>
+          <p><span class="label">Phone:</span> ${data.phoneNumber || ""}</p>
+          <p><span class="label">Event Type:</span> ${data.eventType || ""}</p>
+          <p><span class="label">Date:</span> ${data.date || ""}</p>
+          <p><span class="label">Start Time:</span> ${data.startTime || ""}</p>
+          <p><span class="label">End Time:</span> ${data.endTime || ""}</p>
+          <p><span class="label">Duration:</span> ${data.durationHours || ""} hours</p>
+          <p><span class="label">Catering:</span> ${data.cateringService || ""}</p>
+          <p><span class="label">Submitted:</span> ${formatTimestamp(data.timestamp)}</p>
+        </div>
+      `;
+    }
+
+    function loadBookings() {
+      db.collection("bookings")
+        .orderBy("timestamp", "desc")
+        .onSnapshot((snapshot) => {
+          listContainer.innerHTML = "";
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const div = document.createElement("div");
+            div.className = "booking";
+            div.textContent = `${data.firstName || "No Name"} ${data.surname || ""}`;
+            div.onclick = () => {
+              if (selectedDiv) selectedDiv.classList.remove("selected");
+              div.classList.add("selected");
+              selectedDiv = div;
+              renderDetails(data);
+            };
+            listContainer.appendChild(div);
+          });
+        });
+    }
+
+    loadBookings();
+  </script>
+
+</body>
+</html>
