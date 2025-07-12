@@ -11,26 +11,6 @@
 
 
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyDMM9w0BPEVhu-GnuL0_spwoH_Mkl2GmAE",
-    authDomain: "booking-f5070.firebaseapp.com",
-    projectId: "booking-f5070",
-    storageBucket: "booking-f5070.firebasestorage.app",
-    messagingSenderId: "201773212594",
-    appId: "1:201773212594:web:759d0c29fffb127e667aab"
-  };
-  firebase.initializeApp(firebaseConfig);
-
-  const allowedEmail = "eliteeventsandcaterers@outlook.ie"; // replace this
-
-  firebase.auth().onAuthStateChanged((user) => {
-    if (!user || user.email !== allowedEmail) {
-      // Not logged in or wrong user — redirect to login page or YouTube
-      window.location.href = "https://eliteevent.ie/Login.html"
-    }
-  });
-</script>
 
 
 
